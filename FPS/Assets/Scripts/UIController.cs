@@ -10,8 +10,13 @@ public class UIController : MonoBehaviour
 {
     [Header("Indicators")]
     public TMP_Text Health;
+    public Image bloodOverlay;
     public TMP_Text Ammo;
+    public GameObject[] gunIcons;
     public GameObject killIndicator;
+    public Image killIcon;
+    public GameObject dmgIndicator;
+    public TMP_Text dmgText;
     public GameObject pickUpIndicator;
 
     [Header("Death UI")]

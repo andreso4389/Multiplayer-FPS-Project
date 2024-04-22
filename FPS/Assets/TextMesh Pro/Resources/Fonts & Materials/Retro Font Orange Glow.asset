@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: Retro Font Orange Glow
   m_EditorClassIdentifier: 
-  hashCode: 1383881005
+  hashCode: -483976946
   material: {fileID: 7812648540492096771}
-  materialHashCode: -865570835
+  materialHashCode: 699387886
   m_Version: 1.1.0
   m_SourceFontFileGUID: c39d5993c9b36894d89700e8088ea8d6
   m_SourceFontFile_EditorRef: {fileID: 12800000, guid: c39d5993c9b36894d89700e8088ea8d6, type: 3}

@@ -6365,6 +6365,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: Find Room Button
       objectReference: {fileID: 0}
+    - target: {fileID: 7899328730395816588, guid: 2b9c157d326de0c41a0ad82514da30c4, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8281509402351951524, guid: 2b9c157d326de0c41a0ad82514da30c4, type: 3}
+      propertyPath: m_Type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8281509402351951524, guid: 2b9c157d326de0c41a0ad82514da30c4, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8281509402351951524, guid: 2b9c157d326de0c41a0ad82514da30c4, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8281509402351951524, guid: 2b9c157d326de0c41a0ad82514da30c4, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8407086054289863297, guid: 2b9c157d326de0c41a0ad82514da30c4, type: 3}
       propertyPath: m_fontAsset
       value: 
@@ -6396,6 +6416,10 @@ PrefabInstance:
     - target: {fileID: 8407086054289863297, guid: 2b9c157d326de0c41a0ad82514da30c4, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8432913335930072123, guid: 2b9c157d326de0c41a0ad82514da30c4, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8432913335930072123, guid: 2b9c157d326de0c41a0ad82514da30c4, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target

@@ -8,7 +8,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: M_PCL_Flat_Black
-    second: {fileID: -1391134871863005975, guid: 02577d40b49d1e3448e060e102eb00d9, type: 3}
+    second: {fileID: 2100000, guid: 82a4832e6f259b244a72473d70b26560, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule

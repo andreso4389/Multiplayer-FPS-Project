@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Photon.Pun;
 using UnityEngine.Rendering.HighDefinition;
 using Unity.VisualScripting;
@@ -13,6 +14,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     public Material[] allSkins;
     public bool killSelf = false;
     public GameObject playerOBJ;
+    public AudioSource playerAudio;
 
     [Header("Ragdoll")]
     public GameObject root;
@@ -98,6 +100,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     [Header("Gun list")]
     public Gun[] allGuns;
     public int selectedGun;
+    public int gunSlot;
     public bool isScopedIn;
     public bool canShoot;
     public GameObject weaponHolder;
@@ -105,8 +108,12 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     public Animator reloadAnim;
     public Animator playerAnim;
     public GameObject playerHitImpact;
+
+    [Header("Health variables")]
     public int maxHealth = 100;
     public int currentHealth;
+    public float lastDMGTime;
+    public float regenTimer;
 
     [Header("Camera variables")]
     public Camera cam;
@@ -170,11 +177,27 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
         if (photonView.IsMine)
         {
+            gunSlot = 1;
+
             playerModel.SetActive(false);
             UIController.instance.Health.text = currentHealth.ToString();
+
+            SetCorrespondingGun(gunSlot);
         }
 
         playerModel.GetComponent<Renderer>().material = allSkins[photonView.Owner.ActorNumber % allSkins.Length];
+
+        // find active guns and set as equippedGun for each gunIcon index for a total of 3 equipped guns.
+        for (int i = 0; i < UIController.instance.gunIcons.Length; i++)
+        {
+            for (int j = 0; j < UIController.instance.gunIcons[i].GetComponent<ImageHolderArray>().gunImage.Length; j++)
+            {
+                if (UIController.instance.gunIcons[i].GetComponent<ImageHolderArray>().gunImage[j].activeInHierarchy)
+                {
+                    UIController.instance.gunIcons[i].GetComponent<ImageHolderArray>().equippedGun = UIController.instance.gunIcons[i].GetComponent<ImageHolderArray>().gunImage[j];
+                }
+            }
+        }
     }
 
     private void Update()
@@ -253,9 +276,10 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("Deagle Pull Out") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("Shotgun Pull Out") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("RPG Pull Out") &&
+                !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("M4 Pull Out") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("Pistol Melee"))
             {
-                if (Input.GetMouseButtonDown(0) && allGuns[selectedGun].lastShootTime + allGuns[selectedGun].shootDelay < Time.time && canShoot)
+                if (Input.GetMouseButtonDown(0) && allGuns[selectedGun].lastShootTime + allGuns[selectedGun].shootDelay < Time.time && canShoot && allGuns[selectedGun].isEquipped)
                 {
                     if (allGuns[selectedGun].isShotgun) //Shotgun
                     {
@@ -275,7 +299,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 }
 
                 // Automatic shooting on hold mouse button 0
-                if (Input.GetMouseButton(0) && allGuns[selectedGun].isAutomatic && canShoot)
+                if (Input.GetMouseButton(0) && allGuns[selectedGun].isAutomatic && canShoot && allGuns[selectedGun].isEquipped)
                 {
                     shotCounter -= Time.deltaTime;
 
@@ -286,7 +310,6 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                         gunAnim.SetTrigger("Shoot");
                     }
                 }
-
             }
 
             // melee attack with gun
@@ -294,7 +317,6 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             {
                 GunMelee();
             }
-
 
             // reload on key 'R'
             if (Input.GetKey(KeyCode.R) &&
@@ -304,24 +326,31 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 Reload();
             }
 
+            // Throw weapon on Key 'Q'
             if (Input.GetKeyDown(KeyCode.Q) && allGuns[selectedGun].isEquipped)
             {
-                photonView.RPC("Throw", RpcTarget.All);
+                photonView.RPC("Throw", RpcTarget.All, selectedGun);
 
                 // Unequip weapon thrown, and switch to an available weapon.
                 allGuns[selectedGun].isEquipped = false;
 
-                for (int i = 0; i < allGuns.Length; i++)
+                // Deactivate corresponding gun image
+                UIController.instance.gunIcons[gunSlot - 1].GetComponent<ImageHolderArray>().gunImage[selectedGun].SetActive(false);
+
+                // NEW!!! switch weapons to very next weapon or first weapon in stack
+                if (gunSlot == 3)
                 {
-                    if (allGuns[i].isEquipped)
-                    {
-                        selectedGun = i;
-                        photonView.RPC("SetGun", RpcTarget.All, selectedGun);
-                        break;
-                    }
+                    gunSlot = 1;
+                    SetCorrespondingGun(gunSlot);
+                }
+                else
+                {
+                    gunSlot++;
+                    SetCorrespondingGun(gunSlot);
                 }
             }
 
+            // Pick up weapon on Key 'E'
             PickUpInput();
 
             // display current ammo
@@ -329,16 +358,40 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
             // display current health
             UIController.instance.Health.text = currentHealth.ToString();
+            UIController.instance.bloodOverlay.color = new Color(UIController.instance.bloodOverlay.color.r,
+                                                                 UIController.instance.bloodOverlay.color.g,
+                                                                 UIController.instance.bloodOverlay.color.b,
+                                                                 -(currentHealth - 100) * .01f);
 
-
-            // switch weapons on number keys
-            for (int i = 0; i < allGuns.Length; i++)
+            // Regen health
+            if (currentHealth < maxHealth)
             {
-                if (Input.GetKeyDown((i + 1).ToString()) && selectedGun != i && !reloadAnim.GetCurrentAnimatorStateInfo(0).IsName("Reload") && allGuns[i].isEquipped)
+                if (lastDMGTime + regenTimer < Time.time)
                 {
-                    selectedGun = i;
-                    photonView.RPC("SetGun", RpcTarget.All, selectedGun);
+                    RegenHealth();
                 }
+            }
+
+            //  NEW   Switch weapons based on key pressed  
+            if (Input.GetKeyDown("1") && gunSlot != 1 && !reloadAnim.GetCurrentAnimatorStateInfo(0).IsName("Reload"))
+            {
+
+                gunSlot = 1;
+
+                SetCorrespondingGun(gunSlot);
+
+            }
+            if (Input.GetKeyDown("2") && gunSlot != 2 && !reloadAnim.GetCurrentAnimatorStateInfo(0).IsName("Reload"))
+            {
+                gunSlot = 2;
+
+                SetCorrespondingGun(gunSlot);
+            }
+            if (Input.GetKeyDown("3") && gunSlot != 3 && !reloadAnim.GetCurrentAnimatorStateInfo(0).IsName("Reload"))
+            {
+                gunSlot = 3;
+
+                SetCorrespondingGun(gunSlot);
             }
 
 
@@ -624,12 +677,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             // Create bullet impact effect
             if (hit.collider.gameObject.CompareTag("Player"))
             {
-                // show kill indicator if my last bullet will kill player
-                if (hit.collider.gameObject.GetComponent<PlayerMovementAdvanced>().GiveCurrentHealth() < allGuns[selectedGun].shotDamage)
-                {
-                    Debug.Log("Showing kill indicator");
-                    StartCoroutine(ShowKillIndicator());
-                }
+                int idNumber = photonView.ViewID;
 
                 PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
                 hit.collider.gameObject.GetPhotonView().RPC("DealDamage",
@@ -640,9 +688,10 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                                                              ray.direction,
                                                              allGuns[selectedGun].dieForce,
                                                              allGuns[selectedGun].flyingDieForce,
+                                                             idNumber,
                                                              isMeleeHit);
 
-                StartCoroutine(TempHitMarker(.08f));
+                StartCoroutine(TempHitMarker(.07f));
             }
             else
             {
@@ -697,6 +746,8 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 // Create bullet impact effect
                 if (hit.collider.gameObject.CompareTag("Player"))
                 {
+                    int idNumber = photonView.ViewID;
+
                     PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
                     hit.collider.gameObject.GetPhotonView().RPC("DealDamage",
                                                                  RpcTarget.Others,
@@ -706,8 +757,8 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                                                                  rays[i].direction,
                                                                  allGuns[selectedGun].dieForce,
                                                                  allGuns[selectedGun].flyingDieForce,
+                                                                 idNumber,
                                                                  isMeleeHit);
-
 
                     StartCoroutine(TempHitMarker(.08f));
                 }
@@ -813,8 +864,6 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         }
     }
 
-
-
     private IEnumerator SpawnTrail(TrailRenderer trail, RaycastHit hit)
     {
         float time = 0;
@@ -867,7 +916,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void Throw()
+    public void Throw(int gunToThrow)
     {
         Ray ray = cam.ViewportPointToRay(new Vector3(.5f, .5f, 0));
         RaycastHit hit;
@@ -880,9 +929,9 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             targetPoint = ray.GetPoint(75); // Just a point far away from the player
 
         // Calculate direction from bulletSpawnPoint to targetPoint
-        Vector3 direction = targetPoint - allGuns[selectedGun].gunModel.transform.position;
+        Vector3 direction = targetPoint - allGuns[gunToThrow].gunModel.transform.position;
 
-        GameObject gun = Instantiate(allGuns[selectedGun].gunModel, allGuns[selectedGun].gunModel.transform.position, Quaternion.identity);
+        GameObject gun = Instantiate(allGuns[gunToThrow].gunModel, allGuns[gunToThrow].gunModel.transform.position, Quaternion.identity);
 
         gun.transform.forward = direction.normalized;
 
@@ -898,8 +947,10 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         gun.GetComponent<Outline>().enabled = true;
 
         // Throw object forwards an upwards
-        gun.GetComponent<Rigidbody>().AddForce(direction.normalized * ThrowController.instance.throwForce, ForceMode.Impulse);
-        gun.GetComponent<Rigidbody>().AddForce(cam.transform.up * ThrowController.instance.upwardForce, ForceMode.Impulse);
+        gun.GetComponent<Rigidbody>().AddForce(direction.normalized * tc.throwForce, ForceMode.Impulse);
+        gun.GetComponent<Rigidbody>().AddForce(cam.transform.up * tc.upwardForce, ForceMode.Impulse);
+
+        allGuns[gunToThrow].gameObject.SetActive(false);
     }
 
     public void PickUpInput()
@@ -918,23 +969,32 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                     j = i;
                     pickUpObjectEquipped = false;
                 }
+                else if (pickUpObject.CompareTag("Pick Up Spawner") && pickUpObject.GetComponent<PickUpController>().gun.gameObject.name.Contains(allGuns[i].name) && !allGuns[i].isEquipped)
+                {
+                    j = i;
+                    pickUpObjectEquipped = false;
+                }
             }
             if (!pickUpObjectEquipped)
             {
                 UIController.instance.pickUpIndicator.SetActive(true);
-                if (Input.GetKey(KeyCode.E))
+                if (Input.GetKeyDown(KeyCode.E))
                 {
-                    //Rigidbody pickUpObjectRB = pickUpObject.GetComponent<Rigidbody>();
-
-                    //Destroy(pickUpObjectRB);
-                    //pickUpObject.GetComponent<BoxCollider>().enabled = false;
-
-                    //pickUpObject.transform.position = Vector3.Lerp(pickUpObject.transform.position, weaponHolder.transform.position, 5 * Time.deltaTime);
+                    //throw out any equipped weapon to replace for newly equipped weapon
+                    for (int i = 0; i < UIController.instance.gunIcons[gunSlot - 1].GetComponent<ImageHolderArray>().gunImage.Length; i++)
+                    {
+                        if (UIController.instance.gunIcons[gunSlot - 1].GetComponent<ImageHolderArray>().gunImage[i].activeInHierarchy)
+                        {
+                            UIController.instance.gunIcons[gunSlot - 1].GetComponent<ImageHolderArray>().gunImage[i].SetActive(false);
+                            photonView.RPC("Throw", RpcTarget.All, i);
+                            allGuns[i].isEquipped = false;
+                        }
+                    }
 
                     allGuns[j].isEquipped = true;
+                    UIController.instance.gunIcons[gunSlot - 1].GetComponent<ImageHolderArray>().gunImage[j].SetActive(true);
 
-                    selectedGun = j;
-                    photonView.RPC("SetGun", RpcTarget.All, selectedGun);
+                    SetCorrespondingGun(gunSlot);
 
                     Destroy(pickUpObject);
                 }
@@ -975,9 +1035,28 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
     private IEnumerator TempHitMarker(float duration)
     {
-        hitMarker.SetActive(true);
-        yield return new WaitForSeconds(duration);
-        hitMarker.SetActive(false);
+        if (photonView.IsMine)
+        {
+            playerAudio.Play();
+            hitMarker.SetActive(true);
+
+            Vector2 originalSize = new Vector2(95, 95);
+            Vector2 newSize = new Vector2(135, 135);
+
+            float time = 0f;
+
+            while (time < .06f)
+            {
+                hitMarker.GetComponent<RectTransform>().sizeDelta = Vector2.Lerp(originalSize, newSize, 10f * time);
+
+                time += Time.deltaTime;
+
+                yield return null;
+            }
+
+            hitMarker.SetActive(false);
+            hitMarker.GetComponent<RectTransform>().sizeDelta = originalSize;
+        }
     }
 
     [PunRPC]
@@ -987,17 +1066,18 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void DealDamage(string damager, int damageAmount, int actor, Vector3 direction, float dieForce, float flyingDieForce, bool isMeleeHit)
+    public void DealDamage(string damager, int damageAmount, int actor, Vector3 direction, float dieForce, float flyingDieForce, int idNumber, bool isMeleeHit)
     {
-        TakeDamage(damager, damageAmount, actor, direction, dieForce, flyingDieForce, isMeleeHit);
+        TakeDamage(damager, damageAmount, actor, direction, dieForce, flyingDieForce, idNumber, isMeleeHit);
     }
 
     public Transform lastPlayerPosition;
-    public void TakeDamage(string damager, int damageAmount, int actor, Vector3 direction, float dieForce, float flyingDieForce, bool isMeleeHit)
+    public void TakeDamage(string damager, int damageAmount, int actor, Vector3 direction, float dieForce, float flyingDieForce, int idNumber, bool isMeleeHit)
     {
         if (photonView.IsMine)
         {
             currentHealth -= damageAmount;
+            lastDMGTime = Time.time;
 
             if (isMeleeHit && currentHealth > 0)
                 root.GetPhotonView().RPC("ApplyForce", RpcTarget.All, direction * dieForce / 2);
@@ -1005,8 +1085,20 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             // if health reaches 0, ragdoll, explode in blood, and respawn
             if (currentHealth <= 0)
             {
+                PhotonNetwork.GetPhotonView(idNumber).RPC("ShowKillIndicator", RpcTarget.Others); // Call ShowKillIndicator() on whoever killed me 
+
                 direction.y = flyingDieForce; // add upward force on ragdoll
+
+                for (int i = 2; i < allGuns.Length; i++)
+                {
+                    if (allGuns[i].isEquipped)
+                    {
+                        photonView.RPC("Throw", RpcTarget.All, i);
+                    }
+                }
+
                 playerModel.SetActive(true);
+
                 root.GetPhotonView().RPC("ActivateRagdoll", RpcTarget.All);
                 root.GetPhotonView().RPC("ApplyForce", RpcTarget.All, direction * dieForce);
 
@@ -1082,7 +1174,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             gun.gameObject.SetActive(false);
         }
         if (photonView.IsMine)
-            ThrowController.instance.gunModel = allGuns[selectedGun].gunModel;
+            tc.gunModel = allGuns[selectedGun].gunModel;
 
         gunAnim.SetTrigger("Pull out");
         gunAnim.SetInteger("Gun", selectedGun);
@@ -1117,16 +1209,61 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         LBUIController.instance.sensIsSaved = true;
     }
 
+    [PunRPC]
     public IEnumerator ShowKillIndicator()
     {
-        UIController.instance.killIndicator.SetActive(true);
-        yield return new WaitForSeconds(1f);
-        UIController.instance.killIndicator.SetActive(false);
+        if (photonView.IsMine)
+        {
+            UIController.instance.killIndicator.SetActive(true);
+
+            var tempColor = UIController.instance.killIcon.color; // store killIcon.color values
+
+            float time = 0f;
+
+            yield return new WaitForSeconds(.35f);
+
+            while (time < 1f)
+            {
+                tempColor.a = Mathf.Lerp(1, 0, 2.5f * time); // change opacity of stored color values to a lerp value from 1 to 0
+
+                UIController.instance.killIcon.color = tempColor; // change killIcon color to tempColor lerp value
+
+                time += Time.deltaTime / 2;
+
+                yield return null;
+            }
+
+            UIController.instance.killIndicator.SetActive(false);
+        }
     }
 
-    [PunRPC]
-    public int GiveCurrentHealth()
+    private void RegenHealth()
     {
-        return currentHealth;
+        currentHealth += 1;
+
+        if (currentHealth >= maxHealth)
+        {
+            currentHealth = maxHealth;
+            return;
+        }
+    }
+
+    private void SetCorrespondingGun(int gunSlot)
+    {
+        UIController.instance.gunIcons[0].GetComponent<Image>().enabled = false;
+        UIController.instance.gunIcons[1].GetComponent<Image>().enabled = false;
+        UIController.instance.gunIcons[2].GetComponent<Image>().enabled = false;
+
+        for (int i = 0; i < UIController.instance.gunIcons[gunSlot - 1].GetComponent<ImageHolderArray>().gunImage.Length; i++)
+        {
+            if (UIController.instance.gunIcons[gunSlot - 1].GetComponent<ImageHolderArray>().gunImage[i].activeInHierarchy)
+            {
+                selectedGun = i;
+                photonView.RPC("SetGun", RpcTarget.All, selectedGun);
+                break;
+            }
+        }
+        UIController.instance.gunIcons[gunSlot - 1].GetComponent<Image>().enabled = true;
+
     }
 }

@@ -8,12 +8,12 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Black
-    second: {fileID: -1580535799172915004, guid: 02577d40b49d1e3448e060e102eb00d9, type: 3}
+    second: {fileID: 2100000, guid: 2c34c8b9d101abd4ab96f34ff25be03f, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: DarkMetal
-    second: {fileID: 2100000, guid: 4d6cf7cf8395db442965e3cf058b6f47, type: 2}
+    second: {fileID: 2100000, guid: 2c34c8b9d101abd4ab96f34ff25be03f, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
@@ -28,7 +28,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Grey
-    second: {fileID: 2100000, guid: 4d6cf7cf8395db442965e3cf058b6f47, type: 2}
+    second: {fileID: 2100000, guid: 2c34c8b9d101abd4ab96f34ff25be03f, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

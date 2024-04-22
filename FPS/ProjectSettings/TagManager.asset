@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Gun
   - Bullet
+  - Pick Up Spawner
   layers:
   - Default
   - TransparentFX
