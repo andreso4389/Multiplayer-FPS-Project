@@ -1045,7 +1045,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
             float time = 0f;
 
-            while (time < .06f)
+            while (time < .09f)
             {
                 hitMarker.GetComponent<RectTransform>().sizeDelta = Vector2.Lerp(originalSize, newSize, 10f * time);
 
