@@ -15,10 +15,7 @@ public class UIController : MonoBehaviour
     public GameObject[] gunIcons;
     public GameObject killIndicator;
     public Image killIcon;
-    public GameObject dmgIndicator;
-    public TMP_Text dmgText;
     public GameObject dmgIndicatorGO;
-    public Animator dmgAnim;
     public GameObject pickUpIndicator;
 
     [Header("Death UI")]

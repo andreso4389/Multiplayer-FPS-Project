@@ -764,6 +764,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                                                                  idNumber,
                                                                  isMeleeHit);
 
+                    StartCoroutine(ShowDMGIndicator(hit.collider.gameObject, allGuns[selectedGun].shotDamage));
                     StartCoroutine(TempHitMarker(.08f));
                 }
                 else
@@ -1246,6 +1247,9 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         if (photonView.IsMine)
         {
             GameObject dmgIndicator = Instantiate(UIController.instance.dmgIndicatorGO, ui.transform);
+            dmgIndicator.SetActive(false);
+
+            dmgIndicator.GetComponentInChildren<Animator>().Play("dmgIndicator", 0);
 
             dmgIndicator.GetComponent<TrackUI>().playerCamera = cam;
             dmgIndicator.GetComponent<TrackUI>().Subject = other.transform;
@@ -1253,13 +1257,12 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
             dmgIndicator.GetComponentInChildren<TextMeshProUGUI>().text = damage.ToString();
 
-            dmgIndicator.GetComponentInChildren<Animator>().Play("dmgIndicator", 0);
-
             float time = 0f;
 
             while (time < 1f)
             {
-                dmgIndicator.GetComponentInChildren<TextMeshProUGUI>().alpha = Mathf.Lerp(1, 0, 2.5f * time);
+                dmgIndicator.SetActive(true);
+                dmgIndicator.GetComponentInChildren<TextMeshProUGUI>().alpha = Mathf.Lerp(1, 0, time);
 
                 time += Time.deltaTime;
 
@@ -1267,28 +1270,6 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             }
 
             Destroy(dmgIndicator);
-
-            /*
-            UIController.instance.dmgIndicator.GetComponent<TrackUI>().Subject = other.transform;
-
-            UIController.instance.dmgIndicator.SetActive(true);
-
-            UIController.instance.dmgAnim.Play("dmgIndicator", 0);
-
-            UIController.instance.dmgText.text = damage.ToString(); 
-
-            float time = 0f;
-
-            while (time < 1f)
-            {
-                UIController.instance.dmgText.alpha = Mathf.Lerp(1, 0, 2.5f * time);
-
-                time += Time.deltaTime;
-
-                yield return null;
-            }
-            UIController.instance.dmgIndicator.SetActive(false);
-            */
         }
     }
     private void RegenHealth()
