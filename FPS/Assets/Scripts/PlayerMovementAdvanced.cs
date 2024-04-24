@@ -956,9 +956,10 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         gun.GetComponent<Rigidbody>().AddForce(cam.transform.up * tc.upwardForce, ForceMode.Impulse);
 
         gun.AddComponent<DestroyOverTime>();
-        gun.GetComponent<DestroyOverTime>().lifeTime = 10f;
+        gun.GetComponent<DestroyOverTime>().lifeTime = 30f;
 
         allGuns[gunToThrow].gameObject.SetActive(false);
+        allGuns[gunToThrow].isEquipped = false;
     }
 
     public void PickUpInput()
@@ -995,7 +996,6 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                         {
                             UIController.instance.gunIcons[gunSlot - 1].GetComponent<ImageHolderArray>().gunImage[i].SetActive(false);
                             photonView.RPC("Throw", RpcTarget.All, i);
-                            allGuns[i].isEquipped = false;
                         }
                     }
 
@@ -1185,6 +1185,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         }
         if (photonView.IsMine)
             tc.gunModel = allGuns[selectedGun].gunModel;
+            allGuns[selectedGun].isEquipped = true;
 
         gunAnim.SetTrigger("Pull out");
         gunAnim.SetInteger("Gun", selectedGun);
@@ -1312,8 +1313,8 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         {
             if (UIController.instance.gunIcons[gunSlot - 1].GetComponent<ImageHolderArray>().gunImage[i].activeInHierarchy)
             {
-                selectedGun = i;
-                photonView.RPC("SetGun", RpcTarget.All, selectedGun);
+                //selectedGun = i;
+                photonView.RPC("SetGun", RpcTarget.All, i);
                 break;
             }
         }

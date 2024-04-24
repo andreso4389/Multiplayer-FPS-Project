@@ -2403,7 +2403,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e96ff7ca27bc574a8705bac4051b3f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isEquipped: 1
+  isEquipped: 0
   isMelee: 0
   isThrowable: 0
   attackDelay: 0
@@ -5530,7 +5530,7 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: f0267f5af35dca04c97c8709b8c52587, type: 3}
     - target: {fileID: 2083366311745271942, guid: 38074321d88bbe3438955d413494dac3, type: 3}
       propertyPath: isEquipped
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2083366311745271942, guid: 38074321d88bbe3438955d413494dac3, type: 3}
       propertyPath: audioSource
@@ -5578,7 +5578,7 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: cb32f253771551e4e9b56f0b86c5e17a, type: 3}
     - target: {fileID: 2291874332859427727, guid: 38074321d88bbe3438955d413494dac3, type: 3}
       propertyPath: isEquipped
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2291874332859427727, guid: 38074321d88bbe3438955d413494dac3, type: 3}
       propertyPath: shotDamage
