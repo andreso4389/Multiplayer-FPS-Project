@@ -955,6 +955,9 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         gun.GetComponent<Rigidbody>().AddForce(direction.normalized * tc.throwForce, ForceMode.Impulse);
         gun.GetComponent<Rigidbody>().AddForce(cam.transform.up * tc.upwardForce, ForceMode.Impulse);
 
+        gun.AddComponent<DestroyOverTime>();
+        gun.GetComponent<DestroyOverTime>().lifeTime = 10f;
+
         allGuns[gunToThrow].gameObject.SetActive(false);
     }
 
@@ -1222,20 +1225,21 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         if (photonView.IsMine)
         {
             UIController.instance.killIndicator.SetActive(true);
+            UIController.instance.killIcon.GetComponent<Animator>().Play("KillAnim", 0);
 
             var tempColor = UIController.instance.killIcon.color; // store killIcon.color values
 
             float time = 0f;
 
-            yield return new WaitForSeconds(.35f);
+            //yield return new WaitForSeconds(.35f);
 
-            while (time < 1f)
+            while (time < .5f)
             {
-                tempColor.a = Mathf.Lerp(1, 0, 2.5f * time); // change opacity of stored color values to a lerp value from 1 to 0
+                tempColor.a = Mathf.Lerp(1, 0, 2 * time); // change opacity of stored color values to a lerp value from 1 to 0
 
                 UIController.instance.killIcon.color = tempColor; // change killIcon color to tempColor lerp value
 
-                time += Time.deltaTime / 2;
+                time += Time.deltaTime;
 
                 yield return null;
             }
