@@ -1092,6 +1092,8 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             {
                 PhotonNetwork.GetPhotonView(idNumber).RPC("ShowKillIndicator", RpcTarget.Others); // Call ShowKillIndicator() on whoever killed me 
 
+                photonView.RPC("ShowKillFeed", RpcTarget.All, damager);
+
                 direction.y = flyingDieForce; // add upward force on ragdoll
 
                 for (int i = 2; i < allGuns.Length; i++)
@@ -1272,6 +1274,19 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             Destroy(dmgIndicator);
         }
     }
+
+    [PunRPC]
+    public IEnumerator ShowKillFeed(string damager)
+    {
+        GameObject killFeedText = Instantiate(UIController.instance.killFeedGO, UIController.instance.killFeedUI.transform);
+
+        killFeedText.GetComponentInChildren<TextMeshProUGUI>().text = damager + " murked " + photonView.Owner.NickName;
+
+        yield return new WaitForSeconds(3f);
+
+        Destroy(killFeedText);
+    }
+
     private void RegenHealth()
     {
         currentHealth += 1;

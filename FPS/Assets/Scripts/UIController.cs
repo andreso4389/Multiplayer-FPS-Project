@@ -15,6 +15,8 @@ public class UIController : MonoBehaviour
     public GameObject[] gunIcons;
     public GameObject killIndicator;
     public Image killIcon;
+    public GameObject killFeedUI;
+    public GameObject killFeedGO;
     public GameObject dmgIndicatorGO;
     public GameObject pickUpIndicator;
 
