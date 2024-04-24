@@ -1831,7 +1831,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d4acdae16d78ce40b512577d95671de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 5121199269228833504, guid: 74123590d686a7142b13274a99d33cb4, type: 3}
+  playerPrefab: {fileID: 2488091168796211223, guid: 74123590d686a7142b13274a99d33cb4, type: 3}
   deathEffect: {fileID: 7492862115563892434, guid: f7f2b0a6872db2e48a7404cc7637b0a7, type: 3}
   respawnTime: 5
 --- !u!4 &766202861
@@ -5312,7 +5312,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1982121800}
   m_LocalRotation: {x: -0, y: 0.7300427, z: -0, w: -0.6834015}
-  m_LocalPosition: {x: 24.031, y: 1.57, z: -5.797}
+  m_LocalPosition: {x: 23.809, y: 1.78, z: -6.251}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

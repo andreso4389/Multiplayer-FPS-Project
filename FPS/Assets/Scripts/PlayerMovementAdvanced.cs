@@ -7,6 +7,7 @@ using UnityEngine.Rendering.HighDefinition;
 using Unity.VisualScripting;
 using Photon.Pun.Demo.Cockpit;
 using System.Linq;
+using TMPro;
 
 public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 {
@@ -15,6 +16,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     public bool killSelf = false;
     public GameObject playerOBJ;
     public AudioSource playerAudio;
+    public Canvas ui;
 
     [Header("Ragdoll")]
     public GameObject root;
@@ -691,7 +693,9 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                                                              idNumber,
                                                              isMeleeHit);
 
+                StartCoroutine(ShowDMGIndicator(hit.collider.gameObject, allGuns[selectedGun].shotDamage));
                 StartCoroutine(TempHitMarker(.07f));
+
             }
             else
             {
@@ -1237,6 +1241,56 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         }
     }
 
+    public IEnumerator ShowDMGIndicator(GameObject other, int damage)
+    {
+        if (photonView.IsMine)
+        {
+            GameObject dmgIndicator = Instantiate(UIController.instance.dmgIndicatorGO, ui.transform);
+
+            dmgIndicator.GetComponent<TrackUI>().playerCamera = cam;
+            dmgIndicator.GetComponent<TrackUI>().Subject = other.transform;
+            dmgIndicator.GetComponent<TrackUI>().mCanvas = ui.GetComponent<RectTransform>();
+
+            dmgIndicator.GetComponentInChildren<TextMeshProUGUI>().text = damage.ToString();
+
+            dmgIndicator.GetComponentInChildren<Animator>().Play("dmgIndicator", 0);
+
+            float time = 0f;
+
+            while (time < 1f)
+            {
+                dmgIndicator.GetComponentInChildren<TextMeshProUGUI>().alpha = Mathf.Lerp(1, 0, 2.5f * time);
+
+                time += Time.deltaTime;
+
+                yield return null;
+            }
+
+            Destroy(dmgIndicator);
+
+            /*
+            UIController.instance.dmgIndicator.GetComponent<TrackUI>().Subject = other.transform;
+
+            UIController.instance.dmgIndicator.SetActive(true);
+
+            UIController.instance.dmgAnim.Play("dmgIndicator", 0);
+
+            UIController.instance.dmgText.text = damage.ToString(); 
+
+            float time = 0f;
+
+            while (time < 1f)
+            {
+                UIController.instance.dmgText.alpha = Mathf.Lerp(1, 0, 2.5f * time);
+
+                time += Time.deltaTime;
+
+                yield return null;
+            }
+            UIController.instance.dmgIndicator.SetActive(false);
+            */
+        }
+    }
     private void RegenHealth()
     {
         currentHealth += 1;
@@ -1266,4 +1320,6 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         UIController.instance.gunIcons[gunSlot - 1].GetComponent<Image>().enabled = true;
 
     }
+
+
 }
