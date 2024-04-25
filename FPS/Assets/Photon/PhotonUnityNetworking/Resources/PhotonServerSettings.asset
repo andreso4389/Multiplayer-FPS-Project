@@ -64,6 +64,7 @@ MonoBehaviour:
   - ShowKillIndicator
   - ShowKillFeed
   - ApplyExplosionForce
+  - SetPlayerName
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

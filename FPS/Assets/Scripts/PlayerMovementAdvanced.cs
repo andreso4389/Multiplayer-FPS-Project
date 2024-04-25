@@ -17,6 +17,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     public GameObject playerOBJ;
     public AudioSource playerAudio;
     public Canvas ui;
+    public TextMeshPro playerName;
 
     [Header("Ragdoll")]
     public GameObject root;
@@ -174,6 +175,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         startYScale = transform.localScale.y;
 
         photonView.RPC("SetGun", RpcTarget.All, selectedGun);
+        photonView.RPC("SetPlayerName", RpcTarget.All);
 
         currentHealth = maxHealth;
 
@@ -183,6 +185,8 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
             playerModel.SetActive(false);
             UIController.instance.Health.text = currentHealth.ToString();
+
+            //playerName.text = photonView.Owner.NickName;
 
             SetCorrespondingGun(gunSlot);
         }
@@ -243,6 +247,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             else
                 rb.drag = 0;
 
+            // sprint effect
             if (rb.velocity.magnitude >= sprintSpeed - 1)
             {
                 if (!sprintEffect.isPlaying)
@@ -1213,6 +1218,12 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             selectedGun = gunToSwitchTo;
             SwitchGun();
         }
+    }
+
+    [PunRPC]
+    public void SetPlayerName()
+    {
+        playerName.text = photonView.Owner.NickName;
     }
 
     public void SetSensitivity()
