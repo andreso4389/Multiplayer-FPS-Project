@@ -7,6 +7,7 @@ TagManager:
   - Gun
   - Bullet
   - Pick Up Spawner
+  - Player Name
   layers:
   - Default
   - TransparentFX

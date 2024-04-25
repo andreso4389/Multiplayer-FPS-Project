@@ -18,6 +18,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     public AudioSource playerAudio;
     public Canvas ui;
     public TextMeshPro playerName;
+    private GameObject[] listOfPlayerNames;
 
     [Header("Ragdoll")]
     public GameObject root;
@@ -184,9 +185,9 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             gunSlot = 1;
 
             playerModel.SetActive(false);
+            playerName.enabled = false;
+            
             UIController.instance.Health.text = currentHealth.ToString();
-
-            //playerName.text = photonView.Owner.NickName;
 
             SetCorrespondingGun(gunSlot);
         }
@@ -368,6 +369,9 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                                                                  UIController.instance.bloodOverlay.color.g,
                                                                  UIController.instance.bloodOverlay.color.b,
                                                                  -(currentHealth - 100) * .01f);
+
+            listOfPlayerNames = GameObject.FindGameObjectsWithTag("Player Name");
+            FacePlayerNamesTowardsCam();
 
             // Regen health
             if (currentHealth < maxHealth)
@@ -1339,5 +1343,11 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
     }
 
-
+    private void FacePlayerNamesTowardsCam()
+    {
+        for (int i = 0; i < listOfPlayerNames.Length; i++)
+        {
+            listOfPlayerNames[i].transform.LookAt(cam.transform);
+        }
+    }
 }
