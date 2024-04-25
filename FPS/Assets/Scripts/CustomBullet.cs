@@ -50,7 +50,7 @@ public class CustomBullet : MonoBehaviourPunCallbacks
         for (int i = 0; i < enemies.Length; i++)
         {
             enemies[i].GetComponent<Rigidbody>().AddExplosionForce(explosionForce, transform.position, explosionRange);
-            enemies[i].GetComponent<PlayerMovementAdvanced>().TakeExplosionDamage("Rocket", explosionDamage, 0, explosionForce);
+            enemies[i].GetComponent<PlayerMovementAdvanced>().TakeExplosionDamage("Rocket", explosionDamage, 0, explosionForce, transform.position, explosionRange);
         }
 
         Destroy(explosionEffect, 2f);

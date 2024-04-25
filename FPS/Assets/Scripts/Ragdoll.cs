@@ -53,4 +53,10 @@ public class Ragdoll : MonoBehaviourPunCallbacks
         forcedBody.AddForce(force, ForceMode.VelocityChange);
     }
 
+    [PunRPC]
+    public void ApplyExplosionForce(float force, Vector3 rocketPosition, float explosionRange)
+    {
+        forcedBody.AddExplosionForce(force, rocketPosition, explosionRange);
+    }
+
 }
