@@ -186,7 +186,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
             playerModel.SetActive(false);
             playerName.enabled = false;
-            
+
             UIController.instance.Health.text = currentHealth.ToString();
 
             SetCorrespondingGun(gunSlot);
@@ -1063,14 +1063,14 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             playerAudio.Play();
             hitMarker.SetActive(true);
 
-            Vector2 originalSize = new Vector2(95, 95);
-            Vector2 newSize = new Vector2(135, 135);
+            Vector2 originalSize = new Vector2(60, 60);
+            Vector2 newSize = new Vector2(90, 90);
 
             float time = 0f;
 
             while (time < .09f)
             {
-                hitMarker.GetComponent<RectTransform>().sizeDelta = Vector2.Lerp(originalSize, newSize, 10f * time);
+                hitMarker.GetComponent<RectTransform>().sizeDelta = Vector2.Lerp(originalSize, newSize, 5 * time);
 
                 time += Time.deltaTime;
 
@@ -1109,6 +1109,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             if (currentHealth <= 0)
             {
                 PhotonNetwork.GetPhotonView(idNumber).RPC("ShowKillIndicator", RpcTarget.Others); // Call ShowKillIndicator() on whoever killed me 
+                PhotonNetwork.GetPhotonView(idNumber).RPC("ShowScoreIndicator", RpcTarget.Others); // Call ShowScoreIndicator() to whoever killed me
 
                 photonView.RPC("ShowKillFeed", RpcTarget.All, damager);
 
@@ -1268,6 +1269,45 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             }
 
             UIController.instance.killIndicator.SetActive(false);
+        }
+    }
+
+    [PunRPC]
+    public IEnumerator ShowScoreIndicator()
+    {
+        if (photonView.IsMine)
+        {
+            GameObject scoreIndicator = Instantiate(UIController.instance.scoreIndicator, ui.transform);
+
+            scoreIndicator.GetComponentInChildren<Animator>().Play("ScoreAnim", 0);
+
+            scoreIndicator.GetComponentInChildren<TextMeshProUGUI>().text = "+1";
+
+            float time = 0f;
+
+            while (time < .5f)
+            {
+                scoreIndicator.GetComponentInChildren<TextMeshProUGUI>().alpha = Mathf.Lerp(0, 1, 2 * time); // fade in
+
+                time += Time.deltaTime;
+
+                yield return null;
+            }
+            
+            yield return new WaitForSeconds(.5f);
+
+            time = 0f;
+
+            while (time < .25f)
+            {
+                scoreIndicator.GetComponentInChildren<TextMeshProUGUI>().alpha = Mathf.Lerp(1, 0, 5 * time); // fade out
+
+                time += Time.deltaTime;
+
+                yield return null;
+            }
+
+            Destroy(scoreIndicator);
         }
     }
 

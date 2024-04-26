@@ -14,6 +14,7 @@ public class UIController : MonoBehaviour
     public TMP_Text Ammo;
     public GameObject[] gunIcons;
     public GameObject killIndicator;
+    public GameObject scoreIndicator;
     public Image killIcon;
     public GameObject killFeedUI;
     public GameObject killFeedGO;
