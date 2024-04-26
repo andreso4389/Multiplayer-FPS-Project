@@ -19,6 +19,8 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     public Canvas ui;
     public TextMeshPro playerName;
     private GameObject[] listOfPlayerNames;
+    public GameObject ammoDrop;
+    public GameObject healthDrop;
 
     [Header("Ragdoll")]
     public GameObject root;
@@ -1128,6 +1130,12 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                     }
                 }
 
+                if (allGuns[selectedGun].maxAmmo > 0)
+                {
+                    photonView.RPC("DropAmmo", RpcTarget.All);
+                }
+                photonView.RPC("DropHealth", RpcTarget.All);
+
                 playerModel.SetActive(true);
 
                 root.GetPhotonView().RPC("ActivateRagdoll", RpcTarget.All);
@@ -1161,6 +1169,12 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 PhotonNetwork.GetPhotonView(idNumber).RPC("ShowScoreIndicator", RpcTarget.Others); // Call ShowScoreIndicator() to whoever killed me
 
                 photonView.RPC("ShowKillFeed", RpcTarget.All, damager);
+
+                if (allGuns[selectedGun].maxAmmo > 0)
+                {
+                    photonView.RPC("DropAmmo", RpcTarget.All);
+                }
+                photonView.RPC("DropHealth", RpcTarget.All);
 
                 root.GetPhotonView().RPC("ActivateRagdoll", RpcTarget.All);
                 root.GetPhotonView().RPC("ApplyExplosionForce", RpcTarget.All, explosionForce, rocketPosition, explosionRange);
@@ -1303,7 +1317,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
                 yield return null;
             }
-            
+
             yield return new WaitForSeconds(.5f);
 
             time = 0f;
@@ -1364,7 +1378,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         Destroy(killFeedText);
     }
 
-    private void RegenHealth()
+    public void RegenHealth()
     {
         currentHealth += 1;
 
@@ -1373,6 +1387,25 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             currentHealth = maxHealth;
             return;
         }
+    }
+
+    public void RefillAmmo()
+    {
+        allGuns[selectedGun].maxAmmo = allGuns[selectedGun].maxAmmoSize;
+    }
+
+    [PunRPC]
+    public void DropAmmo()
+    {
+        gameObject.tag = "Untagged";
+        Instantiate(ammoDrop, transform.position, Quaternion.identity);
+    }
+
+    [PunRPC]
+    public void DropHealth()
+    {
+        gameObject.tag = "Untagged";
+        Instantiate(healthDrop, transform.position, Quaternion.identity);
     }
 
     private void SetCorrespondingGun(int gunSlot)

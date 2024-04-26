@@ -32,6 +32,7 @@ public class Gun : MonoBehaviourPunCallbacks
     public float dieForce;
     public int magSize;
     public int maxAmmo;
+    public int maxAmmoSize;
     public int currentAmmo;
     public float adsZoom;
 

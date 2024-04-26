@@ -26,7 +26,7 @@ public class CustomBullet : MonoBehaviourPunCallbacks
     public int maxCollisions;
     public float maxLifeTime;
     public bool explodeOnTouch = true;
-    
+
     PhysicMaterial physics_mat;
     // Start is called before the first frame update
     void Start()
