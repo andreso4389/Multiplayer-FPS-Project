@@ -841,6 +841,11 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         currentBullet.transform.forward = direction.normalized;
         currentBullet.GetComponent<Rigidbody>().AddForce(direction.normalized * allGuns[selectedGun].shootForce, ForceMode.Impulse);
 
+        // pass my info to custom bullet
+        currentBullet.GetComponent<CustomBullet>().idNumber = photonView.ViewID;
+        currentBullet.GetComponent<CustomBullet>().damager = photonView.Owner.NickName;
+        currentBullet.GetComponent<CustomBullet>().actor = PhotonNetwork.LocalPlayer.ActorNumber;
+
         rb.AddForce(-direction.normalized * allGuns[selectedGun].bodyRecoilForce, ForceMode.Impulse);
 
         shotCounter = allGuns[selectedGun].timeBetweenShots;
@@ -1144,7 +1149,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         }
     }
 
-    public void TakeExplosionDamage(string damager, int damageAmount, int actor, float explosionForce, Vector3 rocketPosition, float explosionRange)
+    public void TakeExplosionDamage(string damager, int damageAmount, int actor, float explosionForce, Vector3 rocketPosition, float explosionRange, int idNumber)
     {
         if (photonView.IsMine)
         {
@@ -1152,6 +1157,11 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
             if (currentHealth <= 0)
             {
+                PhotonNetwork.GetPhotonView(idNumber).RPC("ShowKillIndicator", RpcTarget.Others); // Call ShowKillIndicator() on whoever killed me 
+                PhotonNetwork.GetPhotonView(idNumber).RPC("ShowScoreIndicator", RpcTarget.Others); // Call ShowScoreIndicator() to whoever killed me
+
+                photonView.RPC("ShowKillFeed", RpcTarget.All, damager);
+
                 root.GetPhotonView().RPC("ActivateRagdoll", RpcTarget.All);
                 root.GetPhotonView().RPC("ApplyExplosionForce", RpcTarget.All, explosionForce, rocketPosition, explosionRange);
 

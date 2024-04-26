@@ -4240,8 +4240,20 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: a4ff80228295e7d49ac46ce81199c258, type: 3}
     - target: {fileID: 1408815892136414631, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: Pistol Image 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1408815892136414631, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241184956852531956, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: RPG Image 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375162804199546159, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: M4 image 3
       objectReference: {fileID: 0}
     - target: {fileID: 2375162804199546159, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
       propertyPath: m_IsActive
@@ -4252,6 +4264,10 @@ PrefabInstance:
       value: '3
 
 '
+      objectReference: {fileID: 0}
+    - target: {fileID: 4735298375066787087, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: Sniper Image 3
       objectReference: {fileID: 0}
     - target: {fileID: 5128340512264349441, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
       propertyPath: m_Pivot.x
@@ -4350,12 +4366,24 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5279289876138994521, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: AJ58 image 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5279289876138994521, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6654166862389336421, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: Shotgun Image 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6654166862389336421, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6817441473946112720, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: Revolver Image 3
       objectReference: {fileID: 0}
     - target: {fileID: 7186378871433922368, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
       propertyPath: m_Name
@@ -4376,6 +4404,11 @@ PrefabInstance:
 --- !u!1 &666252908101756860 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2375162804199546159, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+  m_PrefabInstance: {fileID: 3011013147016379027}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3950515974521079911 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2241184956852531956, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
   m_PrefabInstance: {fileID: 3011013147016379027}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &4198579811293493044 stripped
@@ -4406,7 +4439,7 @@ MonoBehaviour:
   - {fileID: 7529574690460149660}
   - {fileID: 8598830085101054019}
   - {fileID: 8471584262533243894}
-  - {fileID: 8821183707642455462}
+  - {fileID: 3950515974521079911}
   - {fileID: 666252908101756860}
   equippedGun: {fileID: 0}
 --- !u!114 &1913063290556537172
@@ -4584,9 +4617,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7444415326187038621}
     m_Modifications:
+    - target: {fileID: 1408815892136414631, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: Pistol Image 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2241184956852531956, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: RPG Image 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2375162804199546159, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: M4 image 2
+      objectReference: {fileID: 0}
     - target: {fileID: 2375162804199546159, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4735298375066787087, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: Sniper Image 2
       objectReference: {fileID: 0}
     - target: {fileID: 5128340512264349441, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
       propertyPath: m_Pivot.x
@@ -4672,6 +4721,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5279289876138994521, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: AJ58 image 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6654166862389336421, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: Shotgun Image 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6817441473946112720, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+      propertyPath: m_Name
+      value: Revolver Image 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7186378871433922368, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
       propertyPath: m_Name
       value: Icon Placeholder 2
@@ -4687,6 +4748,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 6299504286764831505}
   m_SourcePrefab: {fileID: 100100000, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+--- !u!1 &37030777893580062 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6817441473946112720, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+  m_PrefabInstance: {fileID: 6782392097879670734}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &164306809214789291 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6654166862389336421, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
@@ -4700,6 +4766,11 @@ GameObject:
 --- !u!224 &1816185590120077519 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5128340512264349441, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
+  m_PrefabInstance: {fileID: 6782392097879670734}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2281299045590737601 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4735298375066787087, guid: 57fc19b3e7a105943a0b6426aaef3d2a, type: 3}
   m_PrefabInstance: {fileID: 6782392097879670734}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &4441886442816911502 stripped
@@ -4722,8 +4793,8 @@ MonoBehaviour:
   gunImage:
   - {fileID: 1683268216532243607}
   - {fileID: 5589806319906321001}
-  - {fileID: 2649878861576014429}
-  - {fileID: 4318108605808887170}
+  - {fileID: 2281299045590737601}
+  - {fileID: 37030777893580062}
   - {fileID: 164306809214789291}
   - {fileID: 4685340608622775610}
   - {fileID: 9145016791687258849}

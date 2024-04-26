@@ -8,6 +8,9 @@ public class CustomBullet : MonoBehaviourPunCallbacks
     public Rigidbody rb;
     public GameObject explosion;
     public LayerMask whatIsEnemies;
+    public int idNumber;
+    public string damager;
+    public int actor;
 
     [Header("Stats")]
     [Range(0f, 1f)]
@@ -50,7 +53,7 @@ public class CustomBullet : MonoBehaviourPunCallbacks
         for (int i = 0; i < enemies.Length; i++)
         {
             enemies[i].GetComponent<Rigidbody>().AddExplosionForce(explosionForce, transform.position, explosionRange);
-            enemies[i].GetComponent<PlayerMovementAdvanced>().TakeExplosionDamage("Rocket", explosionDamage, 0, explosionForce, transform.position, explosionRange);
+            enemies[i].GetComponent<PlayerMovementAdvanced>().TakeExplosionDamage(damager, explosionDamage, actor, explosionForce, transform.position, explosionRange, idNumber);
         }
 
         Destroy(explosionEffect, 2f);
