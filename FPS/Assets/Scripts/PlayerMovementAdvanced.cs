@@ -21,6 +21,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     private GameObject[] listOfPlayerNames;
     public GameObject ammoDrop;
     public GameObject healthDrop;
+    public bool pickedUpHealth = false;
 
     [Header("Ragdoll")]
     public GameObject root;
@@ -378,7 +379,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             // Regen health
             if (currentHealth < maxHealth)
             {
-                if (lastDMGTime + regenTimer < Time.time)
+                if (lastDMGTime + regenTimer < Time.time || pickedUpHealth)
                 {
                     RegenHealth();
                 }
@@ -1371,7 +1372,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     {
         GameObject killFeedText = Instantiate(UIController.instance.killFeedGO, UIController.instance.killFeedUI.transform);
 
-        killFeedText.GetComponentInChildren<TextMeshProUGUI>().text = damager + " murked " + photonView.Owner.NickName;
+        killFeedText.GetComponentInChildren<TextMeshProUGUI>().text = damager + "          " + photonView.Owner.NickName;
 
         yield return new WaitForSeconds(3f);
 

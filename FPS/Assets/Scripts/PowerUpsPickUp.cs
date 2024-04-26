@@ -23,13 +23,23 @@ public class PowerUpsPickUp : MonoBehaviour
             if (isAmmo)
             {
                 other.gameObject.GetComponent<PlayerMovementAdvanced>().RefillAmmo();
+                Destroy(gameObject);
             }
             if (isHealth)
             {
-                other.gameObject.GetComponent<PlayerMovementAdvanced>().RegenHealth();
+                StartCoroutine(HealthPickUpBool(other.gameObject));
             }
-
-            Destroy(gameObject);
         }
+    }
+
+    public IEnumerator HealthPickUpBool(GameObject other)
+    {
+        other.GetComponent<PlayerMovementAdvanced>().pickedUpHealth = true;
+
+        yield return new WaitForSeconds(1f);
+
+        other.GetComponent<PlayerMovementAdvanced>().pickedUpHealth = false;
+
+        Destroy(gameObject);
     }
 }
