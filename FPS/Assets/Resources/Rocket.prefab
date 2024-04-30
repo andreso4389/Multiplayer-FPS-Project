@@ -121,7 +121,7 @@ Transform:
   - {fileID: 5690511763834573068}
   - {fileID: 5715771759408100777}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &1926861474349699487
 Rigidbody:
@@ -228,12 +228,15 @@ MonoBehaviour:
   explosion: {fileID: 1000011797152326, guid: acf39d9f4addf294d93fa56fa373961b, type: 3}
   whatIsEnemies:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 2048
+  idNumber: 0
+  damager: 
+  actor: 0
   bounciness: 0
   useGravity: 0
   explosionDamage: 100
   explosionRange: 3.5
-  explosionForce: 50
+  explosionForce: 150
   maxCollisions: 0
   maxLifeTime: 10
   explodeOnTouch: 1

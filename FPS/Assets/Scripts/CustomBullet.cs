@@ -53,7 +53,18 @@ public class CustomBullet : MonoBehaviourPunCallbacks
         for (int i = 0; i < enemies.Length; i++)
         {
             enemies[i].GetComponent<Rigidbody>().AddExplosionForce(explosionForce, transform.position, explosionRange);
-            enemies[i].GetComponent<PlayerMovementAdvanced>().TakeExplosionDamage(damager, explosionDamage, actor, explosionForce, transform.position, explosionRange, idNumber);
+
+            Debug.Log("Colliders hit: " + enemies[i].gameObject.name);
+
+            if (enemies[i].GetComponent<PlayerMovementAdvanced>())
+            {
+                enemies[i].GetComponent<PlayerMovementAdvanced>().TakeExplosionDamage(damager, explosionDamage, actor, explosionForce, transform.position, explosionRange, idNumber);
+            }
+            else if (enemies[i].GetComponent<Damage>())
+            {
+                enemies[i].GetComponent<Damage>().pm.TakeExplosionDamage(damager, explosionDamage, actor, explosionForce, transform.position, explosionRange, idNumber);
+            }
+
         }
 
         Destroy(explosionEffect, 2f);

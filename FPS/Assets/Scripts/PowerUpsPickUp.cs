@@ -18,20 +18,22 @@ public class PowerUpsPickUp : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Player"))
+        if (other.gameObject.layer == 11)
         {
-            if (isAmmo)
+            if (isAmmo && other.gameObject.GetComponent<PickUp>().pm.canPickUp)
             {
-                other.gameObject.GetComponent<PlayerMovementAdvanced>().RefillAmmo();
+                other.gameObject.GetComponent<PickUp>().RefillAmmo();
                 Destroy(gameObject);
             }
-            if (isHealth)
+            if (isHealth && other.gameObject.GetComponent<PickUp>().pm.canPickUp)
             {
-                StartCoroutine(HealthPickUpBool(other.gameObject));
+                other.gameObject.GetComponent<PickUp>().RegenHealth();
+                Destroy(gameObject);
             }
         }
     }
 
+    /*
     public IEnumerator HealthPickUpBool(GameObject other)
     {
         other.GetComponent<PlayerMovementAdvanced>().pickedUpHealth = true;
@@ -42,4 +44,6 @@ public class PowerUpsPickUp : MonoBehaviour
 
         Destroy(gameObject);
     }
+
+    */
 }

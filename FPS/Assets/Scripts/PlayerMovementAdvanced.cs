@@ -22,6 +22,8 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     public GameObject ammoDrop;
     public GameObject healthDrop;
     public bool pickedUpHealth = false;
+    public bool canPickUp = true;
+    public LayerMask playerIgnore;
 
     [Header("Ragdoll")]
     public GameObject root;
@@ -679,7 +681,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         Ray ray = cam.ViewportPointToRay(new Vector3(.5f, .5f, 0));
         ray.origin = viewPoint.transform.position;
 
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(ray, out RaycastHit hit, 1000f, ~playerIgnore))
         {
             TrailRenderer trail = Instantiate(allGuns[selectedGun].bulletTrail, allGuns[selectedGun].bulletSpawnPoint.position, Quaternion.identity);
 
@@ -691,18 +693,20 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 int idNumber = photonView.ViewID;
 
                 PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
-                hit.collider.gameObject.GetPhotonView().RPC("DealDamage",
-                                                             RpcTarget.Others,
-                                                             photonView.Owner.NickName,
-                                                             allGuns[selectedGun].shotDamage,
-                                                             PhotonNetwork.LocalPlayer.ActorNumber,
-                                                             ray.direction,
-                                                             allGuns[selectedGun].dieForce,
-                                                             allGuns[selectedGun].flyingDieForce,
-                                                             idNumber,
-                                                             isMeleeHit);
 
-                StartCoroutine(ShowDMGIndicator(hit.collider.gameObject.transform.GetChild(8).gameObject, allGuns[selectedGun].shotDamage));
+                if (hit.collider.gameObject.GetComponent<Damage>())
+                {
+                    hit.collider.gameObject.GetComponent<Damage>().DealDamage(photonView.Owner.NickName,
+                                                                                          allGuns[selectedGun].shotDamage,
+                                                                                          PhotonNetwork.LocalPlayer.ActorNumber,
+                                                                                          ray.direction,
+                                                                                          allGuns[selectedGun].dieForce,
+                                                                                          allGuns[selectedGun].flyingDieForce,
+                                                                                          idNumber,
+                                                                                          isMeleeHit);
+                }
+
+                StartCoroutine(ShowDMGIndicator(hit.collider.gameObject, allGuns[selectedGun].shotDamage));
                 StartCoroutine(TempHitMarker(.07f));
 
             }
@@ -753,30 +757,28 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
         for (int i = 0; i < rays.Length; i++)
         {
-            if (Physics.Raycast(rays[i], out RaycastHit hit))
+            if (Physics.Raycast(rays[i], out RaycastHit hit, 1000f, ~playerIgnore))
             {
                 TrailRenderer trail = Instantiate(allGuns[selectedGun].bulletTrail, allGuns[selectedGun].bulletSpawnPoint.position, Quaternion.identity);
 
                 StartCoroutine(SpawnTrail(trail, hit));
 
-                // Create bullet impact effect
-                if (hit.collider.gameObject.CompareTag("Player"))
+                if (hit.collider.gameObject.GetComponent<Damage>())
                 {
                     int idNumber = photonView.ViewID;
 
                     PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
-                    hit.collider.gameObject.GetPhotonView().RPC("DealDamage",
-                                                                 RpcTarget.Others,
-                                                                 photonView.Owner.NickName,
-                                                                 allGuns[selectedGun].shotDamage,
-                                                                 PhotonNetwork.LocalPlayer.ActorNumber,
-                                                                 rays[i].direction,
-                                                                 allGuns[selectedGun].dieForce,
-                                                                 allGuns[selectedGun].flyingDieForce,
-                                                                 idNumber,
-                                                                 isMeleeHit);
 
-                    hitObject = hit.collider.gameObject.transform.GetChild(8).gameObject;
+                    hit.collider.gameObject.GetComponent<Damage>().DealDamage(photonView.Owner.NickName,
+                                                                              allGuns[selectedGun].shotDamage,
+                                                                              PhotonNetwork.LocalPlayer.ActorNumber,
+                                                                              rays[i].direction,
+                                                                              allGuns[selectedGun].dieForce,
+                                                                              allGuns[selectedGun].flyingDieForce,
+                                                                              idNumber,
+                                                                              isMeleeHit);
+
+                    hitObject = hit.collider.gameObject;
                     hitCount++;
                     StartCoroutine(TempHitMarker(.08f));
                 }
@@ -1131,6 +1133,8 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                     }
                 }
 
+                canPickUp = false;
+
                 if (allGuns[selectedGun].maxAmmo > 0)
                 {
                     photonView.RPC("DropAmmo", RpcTarget.All);
@@ -1341,21 +1345,27 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         if (photonView.IsMine)
         {
             GameObject dmgIndicator = Instantiate(UIController.instance.dmgIndicatorGO, ui.transform);
-            dmgIndicator.SetActive(false);
 
             dmgIndicator.GetComponentInChildren<Animator>().Play("dmgIndicator", 0);
 
-            dmgIndicator.GetComponent<TrackUI>().playerCamera = cam;
+            dmgIndicator.GetComponent<TrackUI>().playerCamera = cam; // Set up dmgIndicator variables
             dmgIndicator.GetComponent<TrackUI>().Subject = other.transform;
             dmgIndicator.GetComponent<TrackUI>().mCanvas = ui.GetComponent<RectTransform>();
 
-            dmgIndicator.GetComponentInChildren<TextMeshProUGUI>().text = damage.ToString();
+            float newDamage = other.gameObject.GetComponent<Damage>().damageMultiplier * damage; //Update damage according to multiplier
+            newDamage = (int)newDamage;
+
+            if (newDamage > damage)
+            {
+                dmgIndicator.GetComponentInChildren<TextMeshProUGUI>().color = new Color(255, 255, 0f, 100);
+            }
+
+            dmgIndicator.GetComponentInChildren<TextMeshProUGUI>().text = newDamage.ToString(); //Set DMG indicator text to newDamage   
 
             float time = 0f;
 
             while (time < 1f)
             {
-                dmgIndicator.SetActive(true);
                 dmgIndicator.GetComponentInChildren<TextMeshProUGUI>().alpha = Mathf.Lerp(1, 0, time);
 
                 time += Time.deltaTime;
@@ -1398,14 +1408,12 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     [PunRPC]
     public void DropAmmo()
     {
-        gameObject.tag = "Untagged";
         Instantiate(ammoDrop, transform.position, Quaternion.identity);
     }
 
     [PunRPC]
     public void DropHealth()
     {
-        gameObject.tag = "Untagged";
         Instantiate(healthDrop, transform.position, Quaternion.identity);
     }
 

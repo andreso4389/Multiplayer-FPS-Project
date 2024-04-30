@@ -1831,7 +1831,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d4acdae16d78ce40b512577d95671de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 2488091168796211223, guid: 74123590d686a7142b13274a99d33cb4, type: 3}
+  playerPrefab: {fileID: 9199140752483708921, guid: 74123590d686a7142b13274a99d33cb4, type: 3}
   deathEffect: {fileID: 7492862115563892434, guid: f7f2b0a6872db2e48a7404cc7637b0a7, type: 3}
   respawnTime: 5
 --- !u!4 &766202861
