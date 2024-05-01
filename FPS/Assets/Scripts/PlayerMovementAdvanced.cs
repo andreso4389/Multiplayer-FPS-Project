@@ -279,9 +279,10 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 SniperScopeOut();
             }
 
+
+
             // if ammo != 0 and gun is not reloading, and gun is not pulling out, allow Shoot()
-            if (allGuns[selectedGun].currentAmmo != 0 &&
-                !reloadAnim.GetCurrentAnimatorStateInfo(0).IsName("Reload") &&
+            if (!reloadAnim.GetCurrentAnimatorStateInfo(0).IsName("Reload") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("Pistol Pull Out") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("AR Pull Out") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("Sniper Pull Out") &&
@@ -291,35 +292,48 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("M4 Pull Out") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("Pistol Melee"))
             {
-                if (Input.GetMouseButtonDown(0) && allGuns[selectedGun].lastShootTime + allGuns[selectedGun].shootDelay < Time.time && canShoot && allGuns[selectedGun].isEquipped)
+                if (allGuns[selectedGun].isMelee)
                 {
-                    if (allGuns[selectedGun].isShotgun) //Shotgun
+                    if (Input.GetMouseButtonDown(0) && allGuns[selectedGun].lastAttackTime + allGuns[selectedGun].attackDelay < Time.time)
                     {
-                        photonView.RPC("ShotgunShoot", RpcTarget.All);
+                        photonView.RPC("Melee", RpcTarget.All);
+                        gunAnim.SetTrigger("Melee");
+                        gunAnim.SetInteger("Gun", selectedGun);
                     }
-                    else if (selectedGun == 5) //RPG
-                    {
-                        photonView.RPC("ProjectileShoot", RpcTarget.All);
-                    }
-                    else //All other weapons
-                    {
-                        photonView.RPC("Shoot", RpcTarget.All);
-                    }
-                    camRecoil.GetPhotonView().RPC("RecoilFire", RpcTarget.All, allGuns[selectedGun].recoilX, allGuns[selectedGun].recoilY, allGuns[selectedGun].recoilZ);
-                    gunAnim.SetTrigger("Shoot");
-                    gunAnim.SetInteger("Gun", selectedGun);
                 }
 
-                // Automatic shooting on hold mouse button 0
-                if (Input.GetMouseButton(0) && allGuns[selectedGun].isAutomatic && canShoot && allGuns[selectedGun].isEquipped)
+                else if (allGuns[selectedGun].currentAmmo != 0)
                 {
-                    shotCounter -= Time.deltaTime;
-
-                    if (shotCounter <= 0)
+                    if (Input.GetMouseButtonDown(0) && allGuns[selectedGun].lastShootTime + allGuns[selectedGun].shootDelay < Time.time && canShoot && allGuns[selectedGun].isEquipped)
                     {
-                        photonView.RPC("Shoot", RpcTarget.All);
+                        if (allGuns[selectedGun].isShotgun) //Shotgun
+                        {
+                            photonView.RPC("ShotgunShoot", RpcTarget.All);
+                        }
+                        else if (selectedGun == 5) //RPG
+                        {
+                            photonView.RPC("ProjectileShoot", RpcTarget.All);
+                        }
+                        else //All other weapons
+                        {
+                            photonView.RPC("Shoot", RpcTarget.All);
+                        }
                         camRecoil.GetPhotonView().RPC("RecoilFire", RpcTarget.All, allGuns[selectedGun].recoilX, allGuns[selectedGun].recoilY, allGuns[selectedGun].recoilZ);
                         gunAnim.SetTrigger("Shoot");
+                        gunAnim.SetInteger("Gun", selectedGun);
+                    }
+
+                    // Automatic shooting on hold mouse button 0
+                    if (Input.GetMouseButton(0) && allGuns[selectedGun].isAutomatic && canShoot && allGuns[selectedGun].isEquipped)
+                    {
+                        shotCounter -= Time.deltaTime;
+
+                        if (shotCounter <= 0)
+                        {
+                            photonView.RPC("Shoot", RpcTarget.All);
+                            camRecoil.GetPhotonView().RPC("RecoilFire", RpcTarget.All, allGuns[selectedGun].recoilX, allGuns[selectedGun].recoilY, allGuns[selectedGun].recoilZ);
+                            gunAnim.SetTrigger("Shoot");
+                        }
                     }
                 }
             }
@@ -690,13 +704,12 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             // Create bullet impact effect
             if (hit.collider.gameObject.CompareTag("Player"))
             {
+                Debug.Log("Swung at " + hit.collider.gameObject.name);
                 int idNumber = photonView.ViewID;
 
                 PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
 
-                if (hit.collider.gameObject.GetComponent<Damage>())
-                {
-                    hit.collider.gameObject.GetComponent<Damage>().DealDamage(photonView.Owner.NickName,
+                hit.collider.gameObject.GetPhotonView().RPC("DealDamage", RpcTarget.Others, photonView.Owner.NickName,
                                                                                           allGuns[selectedGun].shotDamage,
                                                                                           PhotonNetwork.LocalPlayer.ActorNumber,
                                                                                           ray.direction,
@@ -704,7 +717,6 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                                                                                           allGuns[selectedGun].flyingDieForce,
                                                                                           idNumber,
                                                                                           isMeleeHit);
-                }
 
                 StartCoroutine(ShowDMGIndicator(hit.collider.gameObject, allGuns[selectedGun].shotDamage));
                 StartCoroutine(TempHitMarker(.07f));
@@ -769,14 +781,14 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
                     PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
 
-                    hit.collider.gameObject.GetComponent<Damage>().DealDamage(photonView.Owner.NickName,
-                                                                              allGuns[selectedGun].shotDamage,
-                                                                              PhotonNetwork.LocalPlayer.ActorNumber,
-                                                                              rays[i].direction,
-                                                                              allGuns[selectedGun].dieForce,
-                                                                              allGuns[selectedGun].flyingDieForce,
-                                                                              idNumber,
-                                                                              isMeleeHit);
+                    hit.collider.gameObject.GetPhotonView().RPC("DealDamage", RpcTarget.Others, photonView.Owner.NickName,
+                                                                                          allGuns[selectedGun].shotDamage,
+                                                                                          PhotonNetwork.LocalPlayer.ActorNumber,
+                                                                                          rays[i].direction,
+                                                                                          allGuns[selectedGun].dieForce,
+                                                                                          allGuns[selectedGun].flyingDieForce,
+                                                                                          idNumber,
+                                                                                          isMeleeHit);
 
                     hitObject = hit.collider.gameObject;
                     hitCount++;
@@ -892,6 +904,35 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                                                              isMeleeHit);
             }
         }
+    }
+
+    [PunRPC]
+    private void Melee()
+    {
+        bool isMeleeHit = true;
+
+        Ray ray = cam.ViewportPointToRay(new Vector3(.5f, .5f, 0));
+
+        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, allGuns[selectedGun].meleeDistance))
+        {
+            if (hit.collider.gameObject.CompareTag("Player"))
+            {
+                int idNumber = photonView.ViewID;
+
+                PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
+
+                hit.collider.gameObject.GetPhotonView().RPC("DealDamage", RpcTarget.Others, photonView.Owner.NickName,
+                                                                                          allGuns[selectedGun].attackDamage,
+                                                                                          PhotonNetwork.LocalPlayer.ActorNumber,
+                                                                                          ray.direction,
+                                                                                          allGuns[selectedGun].dieForce,
+                                                                                          allGuns[selectedGun].flyingDieForce,
+                                                                                          idNumber,
+                                                                                          isMeleeHit);
+            }
+        }
+
+        allGuns[selectedGun].lastAttackTime = Time.time;
     }
 
     private IEnumerator SpawnTrail(TrailRenderer trail, RaycastHit hit)
@@ -1112,8 +1153,10 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             currentHealth -= damageAmount;
             lastDMGTime = Time.time;
 
+            /*
             if (isMeleeHit && currentHealth > 0)
                 root.GetPhotonView().RPC("ApplyForce", RpcTarget.All, direction * dieForce / 2);
+            */
 
             // if health reaches 0, ragdoll, explode in blood, and respawn
             if (currentHealth <= 0)
