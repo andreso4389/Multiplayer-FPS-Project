@@ -15,9 +15,12 @@ public class Gun : MonoBehaviourPunCallbacks
     public bool isThrowable;
     public float attackDelay;
     public float lastAttackTime;
+    public float lastClickTime;
+    public float comboResetTime;
+    public int comboStep;
     public int attackDamage;
     public float meleeDistance;
-    public Animator meleeAnim;
+    public AudioClip[] meleeSounds;
 
     [Header("Gun stats")]
     public GameObject gunModel;

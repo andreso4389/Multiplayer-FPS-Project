@@ -117,6 +117,7 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     public Animator reloadAnim;
     public Animator playerAnim;
     public GameObject playerHitImpact;
+    public GameObject playerMeleeImpact;
 
     [Header("Health variables")]
     public int maxHealth = 100;
@@ -292,13 +293,35 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("M4 Pull Out") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("Pistol Melee"))
             {
+
+                // combo functionality
                 if (allGuns[selectedGun].isMelee)
                 {
-                    if (Input.GetMouseButtonDown(0) && allGuns[selectedGun].lastAttackTime + allGuns[selectedGun].attackDelay < Time.time)
+                    if (Input.GetMouseButtonDown(0))
                     {
-                        photonView.RPC("Melee", RpcTarget.All);
-                        gunAnim.SetTrigger("Melee");
-                        gunAnim.SetInteger("Gun", selectedGun);
+                        allGuns[selectedGun].lastClickTime = Time.time;
+
+                        if (allGuns[selectedGun].lastAttackTime + allGuns[selectedGun].attackDelay <= Time.time)
+                        {
+                            photonView.RPC("Melee", RpcTarget.All);
+                            camRecoil.GetPhotonView().RPC("RecoilFire", RpcTarget.All, allGuns[selectedGun].recoilX, allGuns[selectedGun].recoilY, allGuns[selectedGun].recoilZ);
+
+                            gunAnim.SetTrigger("Melee");
+                            gunAnim.SetInteger("Gun", selectedGun);
+                            gunAnim.SetInteger("Combo Step", allGuns[selectedGun].comboStep);
+
+                            allGuns[selectedGun].comboStep++;
+
+                            if (allGuns[selectedGun].comboStep == 2)
+                            {
+                                allGuns[selectedGun].comboStep = 0;
+                            }
+                        }
+                    }
+
+                    if (allGuns[selectedGun].lastClickTime + allGuns[selectedGun].comboResetTime <= Time.time)
+                    {
+                        allGuns[selectedGun].comboStep = 0;
                     }
                 }
 
@@ -704,7 +727,6 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             // Create bullet impact effect
             if (hit.collider.gameObject.CompareTag("Player"))
             {
-                Debug.Log("Swung at " + hit.collider.gameObject.name);
                 int idNumber = photonView.ViewID;
 
                 PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
@@ -739,7 +761,10 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             allGuns[selectedGun].currentAmmo = 0;
         }
 
-        allGuns[selectedGun].muzzleFlash.Play();
+        if (allGuns[selectedGun].muzzleFlash != null)
+        {
+            allGuns[selectedGun].muzzleFlash.Play();
+        }
 
         if (allGuns[selectedGun].cartridgeEffect != null)
         {
@@ -818,7 +843,10 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             allGuns[selectedGun].currentAmmo = 0;
         }
 
-        allGuns[selectedGun].muzzleFlash.Play();
+        if (allGuns[selectedGun].muzzleFlash != null)
+        {
+            allGuns[selectedGun].muzzleFlash.Play();
+        }
         allGuns[selectedGun].lastShootTime = Time.time;
 
         allGuns[selectedGun].shotAudioSource.Play();
@@ -876,7 +904,10 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
             allGuns[selectedGun].currentAmmo = 0;
         }
 
-        allGuns[selectedGun].muzzleFlash.Play();
+        if (allGuns[selectedGun].muzzleFlash != null)
+        {
+            allGuns[selectedGun].muzzleFlash.Play();
+        }
         allGuns[selectedGun].lastShootTime = Time.time;
 
         allGuns[selectedGun].shotAudioSource.Play();
@@ -913,13 +944,13 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
 
         Ray ray = cam.ViewportPointToRay(new Vector3(.5f, .5f, 0));
 
-        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, allGuns[selectedGun].meleeDistance))
+        if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, allGuns[selectedGun].meleeDistance, ~playerIgnore))
         {
             if (hit.collider.gameObject.CompareTag("Player"))
             {
                 int idNumber = photonView.ViewID;
 
-                PhotonNetwork.Instantiate(playerHitImpact.name, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
+                Instantiate(playerMeleeImpact, hit.point, Quaternion.LookRotation(hit.normal, Vector3.up));
 
                 hit.collider.gameObject.GetPhotonView().RPC("DealDamage", RpcTarget.Others, photonView.Owner.NickName,
                                                                                           allGuns[selectedGun].attackDamage,
@@ -929,10 +960,21 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                                                                                           allGuns[selectedGun].flyingDieForce,
                                                                                           idNumber,
                                                                                           isMeleeHit);
+
+                StartCoroutine(ShowDMGIndicator(hit.collider.gameObject, allGuns[selectedGun].attackDamage));
+                StartCoroutine(TempHitMarker(.07f));
+            }
+            else
+            {
+                GameObject bulletImpactObject = Instantiate(bulletImpact, hit.point + (hit.normal * .002f), Quaternion.LookRotation(hit.normal, Vector3.up));
+                Destroy(bulletImpactObject, 10f);
             }
         }
 
         allGuns[selectedGun].lastAttackTime = Time.time;
+
+        allGuns[selectedGun].shotAudioSource.clip = allGuns[selectedGun].meleeSounds[allGuns[selectedGun].comboStep];
+        allGuns[selectedGun].shotAudioSource.Play();
     }
 
     private IEnumerator SpawnTrail(TrailRenderer trail, RaycastHit hit)
@@ -1284,7 +1326,10 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         allGuns[selectedGun].gunActionsAudioSource.clip = allGuns[selectedGun].equipSound;
         allGuns[selectedGun].gunActionsAudioSource.Play();
 
-        allGuns[selectedGun].muzzleFlash.Stop();
+        if (allGuns[selectedGun].muzzleFlash != null)
+        {
+            allGuns[selectedGun].muzzleFlash.Stop();
+        }
     }
 
     [PunRPC]
