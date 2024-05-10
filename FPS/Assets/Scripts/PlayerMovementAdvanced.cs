@@ -111,8 +111,11 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
     public int selectedGun;
     public int gunSlot;
     public bool isScopedIn;
+    public bool isAimedIn;
     public bool canShoot;
     public GameObject weaponHolder;
+    public GameObject weaponPos;
+    public Transform originalWeaponPos;
     public Animator gunAnim;
     public Animator reloadAnim;
     public Animator playerAnim;
@@ -211,6 +214,8 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 }
             }
         }
+
+        originalWeaponPos = allGuns[selectedGun].gunModel.transform;
     }
 
     private void Update()
@@ -280,8 +285,6 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 SniperScopeOut();
             }
 
-
-
             // if ammo != 0 and gun is not reloading, and gun is not pulling out, allow Shoot()
             if (!reloadAnim.GetCurrentAnimatorStateInfo(0).IsName("Reload") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("Pistol Pull Out") &&
@@ -291,12 +294,13 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("Shotgun Pull Out") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("RPG Pull Out") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("M4 Pull Out") &&
+                !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("Tomohawk Pull Out") &&
                 !gunAnim.GetCurrentAnimatorStateInfo(0).IsName("Pistol Melee"))
             {
 
-                // combo functionality
                 if (allGuns[selectedGun].isMelee)
                 {
+                    // combo functionality
                     if (Input.GetMouseButtonDown(0))
                     {
                         allGuns[selectedGun].lastClickTime = Time.time;
@@ -316,6 +320,28 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
                             {
                                 allGuns[selectedGun].comboStep = 0;
                             }
+                        }
+                    }
+
+                    // Throw Knife function
+                    if (Input.GetMouseButtonDown(1) && allGuns[selectedGun].lastAttackTime + allGuns[selectedGun].attackDelay <= Time.time)
+                    {
+                        photonView.RPC("ProjectileShoot", RpcTarget.All);
+                        allGuns[selectedGun].isEquipped = false;
+
+                        // Deactivate corresponding gun image
+                        UIController.instance.gunIcons[gunSlot - 1].GetComponent<ImageHolderArray>().gunImage[selectedGun].SetActive(false);
+
+                        // NEW!!! switch weapons to very next weapon or first weapon in stack
+                        if (gunSlot == 3)
+                        {
+                            gunSlot = 1;
+                            SetCorrespondingGun(gunSlot);
+                        }
+                        else
+                        {
+                            gunSlot++;
+                            SetCorrespondingGun(gunSlot);
                         }
                     }
 
@@ -873,12 +899,6 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         // Calculate direction from bulletSpawnPoint to targetPoint
         Vector3 direction = targetPoint - allGuns[selectedGun].bulletSpawnPoint.position;
 
-        // Make rocket on RPG disappear
-        for (int i = 0; i < allGuns[selectedGun].rocket.Length; i++)
-        {
-            allGuns[selectedGun].rocket[i].SetActive(false);
-        }
-
         // Instantiate bullet/projectile
         GameObject currentBullet = Instantiate(allGuns[selectedGun].bullet, allGuns[selectedGun].bulletSpawnPoint.position, Quaternion.identity);
 
@@ -890,27 +910,46 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         currentBullet.GetComponent<CustomBullet>().idNumber = photonView.ViewID;
         currentBullet.GetComponent<CustomBullet>().damager = photonView.Owner.NickName;
         currentBullet.GetComponent<CustomBullet>().actor = PhotonNetwork.LocalPlayer.ActorNumber;
+        currentBullet.GetComponent<CustomBullet>().direction = direction;
+        currentBullet.GetComponent<CustomBullet>().dieForce = allGuns[selectedGun].dieForce;
+        currentBullet.GetComponent<CustomBullet>().flyingDieForce = allGuns[selectedGun].flyingDieForce;
 
         rb.AddForce(-direction.normalized * allGuns[selectedGun].bodyRecoilForce, ForceMode.Impulse);
 
-        shotCounter = allGuns[selectedGun].timeBetweenShots;
-
-        // Increase reticle size on shot
-        reticleCurrentSize += allGuns[selectedGun].retSizePerShot;
-
-        allGuns[selectedGun].currentAmmo -= 1;
-        if (allGuns[selectedGun].currentAmmo <= 0)
+        // Make rocket on RPG disappear
+        if (!allGuns[selectedGun].isMelee)
         {
-            allGuns[selectedGun].currentAmmo = 0;
-        }
+            for (int i = 0; i < allGuns[selectedGun].rocket.Length; i++)
+            {
+                allGuns[selectedGun].rocket[i].SetActive(false);
+            }
 
-        if (allGuns[selectedGun].muzzleFlash != null)
+            shotCounter = allGuns[selectedGun].timeBetweenShots;
+
+            // Increase reticle size on shot
+            reticleCurrentSize += allGuns[selectedGun].retSizePerShot;
+
+            allGuns[selectedGun].currentAmmo -= 1;
+            if (allGuns[selectedGun].currentAmmo <= 0)
+            {
+                allGuns[selectedGun].currentAmmo = 0;
+            }
+
+            if (allGuns[selectedGun].muzzleFlash != null)
+            {
+                allGuns[selectedGun].muzzleFlash.Play();
+            }
+            allGuns[selectedGun].lastShootTime = Time.time;
+
+            allGuns[selectedGun].shotAudioSource.Play();
+        }
+        else
         {
-            allGuns[selectedGun].muzzleFlash.Play();
+            allGuns[selectedGun].gameObject.SetActive(false);
+            allGuns[selectedGun].isEquipped = false;
+            currentBullet.AddComponent<DestroyOverTime>();
+            currentBullet.GetComponent<DestroyOverTime>().lifeTime = 30f;
         }
-        allGuns[selectedGun].lastShootTime = Time.time;
-
-        allGuns[selectedGun].shotAudioSource.Play();
     }
 
     private void GunMelee()
@@ -1194,11 +1233,6 @@ public class PlayerMovementAdvanced : MonoBehaviourPunCallbacks
         {
             currentHealth -= damageAmount;
             lastDMGTime = Time.time;
-
-            /*
-            if (isMeleeHit && currentHealth > 0)
-                root.GetPhotonView().RPC("ApplyForce", RpcTarget.All, direction * dieForce / 2);
-            */
 
             // if health reaches 0, ragdoll, explode in blood, and respawn
             if (currentHealth <= 0)

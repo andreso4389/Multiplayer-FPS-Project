@@ -7,10 +7,16 @@ public class CustomBullet : MonoBehaviourPunCallbacks
 {
     public Rigidbody rb;
     public GameObject explosion;
+    public bool isExplosive;
     public LayerMask whatIsEnemies;
+
+    [Header("Passed variables")]
     public int idNumber;
     public string damager;
     public int actor;
+    public Vector3 direction;
+    public float dieForce;
+    public float flyingDieForce;
 
     [Header("Stats")]
     [Range(0f, 1f)]
@@ -18,7 +24,7 @@ public class CustomBullet : MonoBehaviourPunCallbacks
     public bool useGravity;
 
     [Header("Damage")]
-    public int explosionDamage;
+    public int damage;
     public float explosionRange;
     public float explosionForce;
 
@@ -40,7 +46,18 @@ public class CustomBullet : MonoBehaviourPunCallbacks
         maxLifeTime -= Time.deltaTime;
         if (maxLifeTime <= 0)
         {
-            Explode();
+            if (isExplosive)
+                Explode();
+        }
+        if (!isExplosive && rb.velocity.magnitude > 5f)
+        {
+            transform.Rotate(10, 0, 0);
+            gameObject.GetComponentInChildren<Outline>().enabled = false;
+        }
+        else if (!isExplosive && rb.velocity.magnitude < 1f)
+        {
+            gameObject.GetComponentInChildren<Outline>().enabled = true;
+            gameObject.layer = 10;
         }
     }
 
@@ -54,15 +71,13 @@ public class CustomBullet : MonoBehaviourPunCallbacks
         {
             enemies[i].GetComponent<Rigidbody>().AddExplosionForce(explosionForce, transform.position, explosionRange);
 
-            Debug.Log("Colliders hit: " + enemies[i].gameObject.name);
-
             if (enemies[i].GetComponent<PlayerMovementAdvanced>())
             {
-                enemies[i].GetComponent<PlayerMovementAdvanced>().TakeExplosionDamage(damager, explosionDamage, actor, explosionForce, transform.position, explosionRange, idNumber);
+                enemies[i].GetComponent<PlayerMovementAdvanced>().TakeExplosionDamage(damager, damage, actor, explosionForce, transform.position, explosionRange, idNumber);
             }
             else if (enemies[i].GetComponent<Damage>())
             {
-                enemies[i].GetComponent<Damage>().pm.TakeExplosionDamage(damager, explosionDamage, actor, explosionForce, transform.position, explosionRange, idNumber);
+                enemies[i].GetComponent<Damage>().pm.TakeExplosionDamage(damager, damage, actor, explosionForce, transform.position, explosionRange, idNumber);
             }
 
         }
@@ -76,9 +91,34 @@ public class CustomBullet : MonoBehaviourPunCallbacks
         Destroy(gameObject);
     }
 
+    private void Damage(Collision collision)
+    {
+        if (collision.gameObject.GetComponent<Damage>())
+        {
+            collision.gameObject.GetPhotonView().RPC("DealDamage", RpcTarget.Others, damager,
+                                                                                     damage,
+                                                                                     actor,
+                                                                                     direction,
+                                                                                     dieForce,
+                                                                                     flyingDieForce,
+                                                                                     idNumber,
+                                                                                     false);
+        }
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
-        Explode();
+        if (isExplosive)
+        {
+            Explode();
+        }
+        else
+        {
+            if (collision.gameObject.CompareTag("Player"))
+            {
+                Damage(collision);
+            }
+        }
     }
 
     private void Setup()
@@ -90,7 +130,14 @@ public class CustomBullet : MonoBehaviourPunCallbacks
         physics_mat.bounceCombine = PhysicMaterialCombine.Maximum;
 
         //Assign material to collider
-        GetComponent<CapsuleCollider>().material = physics_mat;
+        if (GetComponent<CapsuleCollider>())
+        {
+            GetComponent<CapsuleCollider>().material = physics_mat;
+        }
+        else if (GetComponent<BoxCollider>())
+        {
+            GetComponent<BoxCollider>().material = physics_mat;
+        }
 
         rb.useGravity = useGravity;
     }

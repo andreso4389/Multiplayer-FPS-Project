@@ -5890,6 +5890,34 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: NaN
       objectReference: {fileID: 0}
+    - target: {fileID: 2072609137763166346, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2157378512650668860, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_RenderMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2380347983779506506, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_fontSize
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 2380347983779506506, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.w
+      value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 2380347983779506506, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.x
+      value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 2380347983779506506, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.y
+      value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 2380347983779506506, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.z
+      value: NaN
+      objectReference: {fileID: 0}
     - target: {fileID: 3533991036227625480, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: NaN
@@ -5934,6 +5962,26 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -90
       objectReference: {fileID: 0}
+    - target: {fileID: 5829394288949952590, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_fontSize
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 5829394288949952590, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.w
+      value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 5829394288949952590, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.x
+      value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 5829394288949952590, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.y
+      value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 5829394288949952590, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.z
+      value: NaN
+      objectReference: {fileID: 0}
     - target: {fileID: 5994058308463295540, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: NaN
@@ -5941,6 +5989,30 @@ PrefabInstance:
     - target: {fileID: 6805523576848420958, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
       propertyPath: m_Name
       value: Leaderboard Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 6805523576848420958, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7197305729800460704, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_fontSize
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 7197305729800460704, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.w
+      value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 7197305729800460704, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.x
+      value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 7197305729800460704, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.y
+      value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 7197305729800460704, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
+      propertyPath: m_margin.z
+      value: NaN
       objectReference: {fileID: 0}
     - target: {fileID: 7870530399587650297, guid: d5920ab2c3b4750419975c88e7e56acd, type: 3}
       propertyPath: m_AnchoredPosition.y

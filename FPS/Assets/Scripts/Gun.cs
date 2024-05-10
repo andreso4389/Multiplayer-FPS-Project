@@ -24,6 +24,8 @@ public class Gun : MonoBehaviourPunCallbacks
 
     [Header("Gun stats")]
     public GameObject gunModel;
+    public Transform originalPosition;
+    public Transform adsPosition;
     public bool isAutomatic;
     public bool isShotgun;
     public float bulletsPerShot;
