@@ -25,7 +25,7 @@ My project is an online multiplayer First Person Shooter (FPS) game built using 
 
 **Dynamic Crosshair**: Enhance your aiming precision with a crosshair that dynamically adjusts size based on recoil and bullet spread.
 
-![Clip17 (Recoil Showcase) - Trimmed](https://github.com/andreso4389/Multiplayer-FPS-Project/assets/68661698/66ff38b6-7297-4b9e-b0be-e30a2d433e2c)
+![Recoil Showcase 2](https://github.com/andreso4389/Multiplayer-FPS-Project/assets/68661698/416e529c-f4ee-4687-a806-b795e0d9ad09)
 
 
 **Immersive Camera Movement**: Experience immersive gameplay with dynamic camera movements that sway during strafing and bounce rhythmically while walking or running.
